@@ -57,3 +57,8 @@
   color: #856404;
 }
 
+.status-badge.registered {
+  background-color: #e7f3ff;
+  color: #004085;
+}
+

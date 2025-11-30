@@ -33,8 +33,15 @@ const SurveyDashboard = ({ surveyId }) => {
         setSurvey(prev => prev ? {
           ...prev,
           status: statusData.status,
-          current_stage: statusData.current_stage
-        } : null);
+          current_stage: statusData.current_stage,
+          title: statusData.title || prev.title
+        } : {
+          id: statusData.survey_id,
+          status: statusData.status,
+          current_stage: statusData.current_stage,
+          title: statusData.title,
+          invite_code: null
+        });
         // Update teams from WebSocket data
         if (statusData.teams) {
           setTeams(statusData.teams);
@@ -114,9 +121,11 @@ const SurveyDashboard = ({ surveyId }) => {
         loading={actionLoading}
       />
 
-      {survey?.status === 'active' && (
-        <TeamsList teams={teams} currentStage={survey?.current_stage} />
-      )}
+      <TeamsList 
+        teams={teams} 
+        currentStage={survey?.current_stage} 
+        surveyStatus={survey?.status}
+      />
 
       {error && <div className="error">{error}</div>}
     </div>
