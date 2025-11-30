@@ -42,28 +42,23 @@ services:
       # HTTP router (redirect to HTTPS)
       - "traefik.http.routers.backend-http.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
       - "traefik.http.routers.backend-http.entrypoints=web"
-      - "traefik.http.routers.backend-http.middlewares=redirect-to-https"
+      - "traefik.http.routers.backend-http.middlewares=redirect-to-https@docker"
       # HTTPS router
       - "traefik.http.routers.backend.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
       - "traefik.http.routers.backend.tls.domains[0].main=${DOMAIN}"
-      - "traefik.http.routers.backend.tls.domains[0].sans=*.${DOMAIN}"
-      - "traefik.http.routers.backend.priority=10"
       # WebSocket HTTP router (redirect to HTTPS)
       - "traefik.http.routers.backend-ws-http.rule=Host(`${DOMAIN}`) && PathPrefix(`/ws`)"
       - "traefik.http.routers.backend-ws-http.entrypoints=web"
-      - "traefik.http.routers.backend-ws-http.middlewares=redirect-to-https"
+      - "traefik.http.routers.backend-ws-http.middlewares=redirect-to-https@docker"
       # WebSocket HTTPS router
       - "traefik.http.routers.backend-ws.rule=Host(`${DOMAIN}`) && PathPrefix(`/ws`)"
       - "traefik.http.routers.backend-ws.entrypoints=websecure"
       - "traefik.http.routers.backend-ws.tls.certresolver=letsencrypt"
       - "traefik.http.routers.backend-ws.tls.domains[0].main=${DOMAIN}"
-      - "traefik.http.routers.backend-ws.tls.domains[0].sans=*.${DOMAIN}"
-      - "traefik.http.routers.backend-ws.priority=10"
       # Service definition
       - "traefik.http.services.backend-service.loadbalancer.server.port=8000"
-      - "traefik.http.services.backend-service.loadbalancer.passhostheader=true"
     command: >
       sh -c "
         alembic upgrade head &&
@@ -91,17 +86,14 @@ services:
       # HTTP router (redirect to HTTPS)
       - "traefik.http.routers.frontend-http.rule=Host(`${DOMAIN}`)"
       - "traefik.http.routers.frontend-http.entrypoints=web"
-      - "traefik.http.routers.frontend-http.middlewares=redirect-to-https"
-      # HTTPS router (lower priority to allow /api and /ws to be handled by backend)
+      - "traefik.http.routers.frontend-http.middlewares=redirect-to-https@docker"
+      # HTTPS router
       - "traefik.http.routers.frontend.rule=Host(`${DOMAIN}`)"
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
       - "traefik.http.routers.frontend.tls.domains[0].main=${DOMAIN}"
-      - "traefik.http.routers.frontend.tls.domains[0].sans=*.${DOMAIN}"
-      - "traefik.http.routers.frontend.priority=1"
       # Service definition
       - "traefik.http.services.frontend-service.loadbalancer.server.port=80"
-      - "traefik.http.services.frontend-service.loadbalancer.passhostheader=true"
 
   traefik:
     image: traefik:v3.5
@@ -111,18 +103,13 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
-      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
       - "--entrypoints.websecure.address=:443"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:-admin@example.com}"
       - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
-      - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory"
       - "--log.level=INFO"
       - "--accesslog=true"
-      - "--accesslog.filters.statuscodes=200-399,401-499,500-599"
-      - "--serversTransport.insecureSkipVerify=true"
     ports:
       - "80:80"
       - "443:443"
@@ -134,6 +121,9 @@ services:
       - survey_network
     labels:
       - "traefik.enable=true"
+      # Middleware definition (MUST be defined here)
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true"
 
 volumes:
   postgres_data:
