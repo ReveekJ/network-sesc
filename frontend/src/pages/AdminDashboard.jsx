@@ -51,6 +51,8 @@ const AdminDashboard = () => {
   const handleBackToCreator = () => {
     setShowDashboard(false);
     setCurrentSurveyId(null);
+    // Force SurveyCreator to reload surveys list
+    // This will be handled by SurveyCreator's useEffect
   };
 
   return (
@@ -60,6 +62,7 @@ const AdminDashboard = () => {
         
         {!currentSurveyId || !showDashboard ? (
           <SurveyCreator 
+            key={showDashboard ? 'dashboard-hidden' : 'dashboard-visible'}
             onSurveyCreated={handleSurveyCreated}
             surveyId={currentSurveyId}
             onGoToDashboard={handleGoToDashboard}

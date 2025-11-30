@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { adminApi } from '../../services/api';
 import QRCodeDisplay from './QRCodeDisplay';
 import './SurveyCreator.css';
@@ -8,6 +8,25 @@ const SurveyCreator = ({ onSurveyCreated, surveyId, onGoToDashboard }) => {
   const [loading, setLoading] = useState(false);
   const [survey, setSurvey] = useState(null);
   const [error, setError] = useState(null);
+  const [activeSurveys, setActiveSurveys] = useState([]);
+  const [loadingSurveys, setLoadingSurveys] = useState(false);
+  const [copiedLinkId, setCopiedLinkId] = useState(null);
+
+  useEffect(() => {
+    loadActiveSurveys();
+  }, []);
+
+  const loadActiveSurveys = async () => {
+    setLoadingSurveys(true);
+    try {
+      const response = await adminApi.getSurveys('active');
+      setActiveSurveys(response.data || []);
+    } catch (err) {
+      console.error('Error loading active surveys:', err);
+    } finally {
+      setLoadingSurveys(false);
+    }
+  };
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -22,6 +41,8 @@ const SurveyCreator = ({ onSurveyCreated, surveyId, onGoToDashboard }) => {
         onSurveyCreated(response.data);
       }
       setTitle('');
+      // Reload active surveys list
+      loadActiveSurveys();
     } catch (err) {
       console.error('Error creating survey:', err); // Debug log
       setError(err.response?.data?.detail || 'Ошибка при создании опроса');
@@ -30,9 +51,65 @@ const SurveyCreator = ({ onSurveyCreated, surveyId, onGoToDashboard }) => {
     }
   };
 
+  const handleCopyLink = (inviteCode, surveyId) => {
+    const link = `${window.location.origin}/survey/${inviteCode}`;
+    navigator.clipboard.writeText(link);
+    setCopiedLinkId(surveyId);
+    setTimeout(() => setCopiedLinkId(null), 2000);
+  };
+
+  const handleGoToSurveyDashboard = (surveyId) => {
+    // Update parent component state with survey ID
+    if (onSurveyCreated) {
+      onSurveyCreated({ id: surveyId });
+    }
+    // Then navigate to dashboard
+    if (onGoToDashboard) {
+      onGoToDashboard();
+    }
+  };
+
   return (
     <div className="survey-creator">
       <h2>Создать опрос</h2>
+      
+      {activeSurveys.length > 0 && (
+        <div className="active-surveys-section">
+          <h3>Запущенные опросы</h3>
+          {loadingSurveys ? (
+            <div>Загрузка...</div>
+          ) : (
+            <div className="surveys-list">
+              {activeSurveys.map((activeSurvey) => (
+                <div key={activeSurvey.id} className="survey-item">
+                  <div className="survey-item-info">
+                    <div className="survey-item-title">{activeSurvey.title}</div>
+                    <div className="survey-item-meta">
+                      <span className="status-badge">{activeSurvey.status}</span>
+                      <span className="invite-code">Код: {activeSurvey.invite_code}</span>
+                    </div>
+                  </div>
+                  <div className="survey-item-actions">
+                    <button
+                      className="button button-secondary"
+                      onClick={() => handleCopyLink(activeSurvey.invite_code, activeSurvey.id)}
+                    >
+                      {copiedLinkId === activeSurvey.id ? '✓ Скопировано' : 'Копировать ссылку'}
+                    </button>
+                    <button
+                      className="button button-primary"
+                      onClick={() => handleGoToSurveyDashboard(activeSurvey.id)}
+                    >
+                      Управление
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       <form onSubmit={handleCreate}>
         <div>
           <label className="label">Название опроса</label>

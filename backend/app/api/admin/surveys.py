@@ -1,11 +1,35 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from typing import List, Optional
 from app.database import get_db
 from app.schemas.survey import SurveyCreate, SurveyResponse, SurveyStatusResponse, SurveyResultsResponse
 from app.services.survey_service import SurveyService
+from app.models.survey import SurveyStatus
 from app.config import settings
 
 router = APIRouter()
+
+
+@router.get("/surveys", response_model=List[SurveyResponse])
+def get_surveys(
+    status: Optional[str] = Query(None, description="Filter by status (draft, active, completed)"),
+    db: Session = Depends(get_db)
+):
+    """
+    Get list of all surveys, optionally filtered by status
+    """
+    try:
+        survey_status = None
+        if status:
+            try:
+                survey_status = SurveyStatus(status)
+            except ValueError:
+                raise HTTPException(status_code=400, detail=f"Invalid status: {status}")
+        
+        surveys = SurveyService.get_all_surveys(db, survey_status)
+        return [SurveyResponse.model_validate(survey, from_attributes=True) for survey in surveys]
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.post("/surveys", response_model=SurveyResponse)

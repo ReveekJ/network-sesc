@@ -14,6 +14,11 @@ export const adminApi = {
     return api.post('/api/admin/surveys', { title });
   },
   
+  getSurveys: (status = null) => {
+    const params = status ? { status } : {};
+    return api.get('/api/admin/surveys', { params });
+  },
+  
   getSurvey: (surveyId) => {
     return api.get(`/api/admin/surveys/${surveyId}`);
   },

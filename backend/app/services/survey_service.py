@@ -77,6 +77,16 @@ class SurveyService:
         return db.query(Survey).filter(Survey.id == survey_id).first()
     
     @staticmethod
+    def get_all_surveys(db: Session, status: Optional[SurveyStatus] = None) -> List[Survey]:
+        """
+        Get all surveys, optionally filtered by status
+        """
+        query = db.query(Survey)
+        if status:
+            query = query.filter(Survey.status == status)
+        return query.order_by(Survey.created_at.desc()).all()
+    
+    @staticmethod
     def get_survey_by_invite_code(db: Session, invite_code: str) -> Optional[Survey]:
         """
         Get survey by invite code
