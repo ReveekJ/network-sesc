@@ -100,7 +100,7 @@ const ResultsStage = ({ teamId }) => {
                           </div>
                           <div className="participant-info">
                             <div className="participant-profession">
-                              <strong>Профессия:</strong> {participant.profession}
+                              <strong>Род деятельности:</strong> {participant.profession}
                             </div>
                             {participant.contact_info && (
                               <div className="participant-contacts">
