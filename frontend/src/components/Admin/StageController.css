@@ -22,8 +22,8 @@
 }
 
 .stage-item.active {
-  border-color: #007bff;
-  background-color: #e7f3ff;
+  border-color: #339c33;
+  background-color: #e8f5e8;
 }
 
 .stage-item.completed {
@@ -44,7 +44,7 @@
 }
 
 .stage-item.active .stage-number {
-  background: #007bff;
+  background: #339c33;
   color: white;
 }
 

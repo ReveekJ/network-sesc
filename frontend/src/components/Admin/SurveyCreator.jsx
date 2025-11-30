@@ -177,7 +177,7 @@ const SurveyCreator = ({ onSurveyCreated, surveyId, onGoToDashboard }) => {
                   <button
                     className="button"
                     onClick={onGoToDashboard}
-                    style={{ width: '100%', backgroundColor: '#007bff', color: 'white' }}
+                    style={{ width: '100%', backgroundColor: '#339c33', color: 'white' }}
                   >
                     Перейти к управлению опросом
                   </button>

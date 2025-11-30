@@ -37,7 +37,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #007bff;
+  background: #339c33;
   color: white;
   display: flex;
   align-items: center;
@@ -71,7 +71,7 @@
   font-size: 16px;
   font-weight: 500;
   margin-bottom: 10px;
-  color: #007bff;
+  color: #339c33;
 }
 
 .progress-bar {
@@ -85,7 +85,7 @@
 
 .progress-fill {
   height: 100%;
-  background-color: #007bff;
+  background-color: #339c33;
   transition: width 0.3s ease;
 }
 
@@ -125,8 +125,8 @@
 }
 
 .vote-tag {
-  background-color: #e7f3ff;
-  color: #007bff;
+  background-color: #e8f5e8;
+  color: #339c33;
   padding: 4px 12px;
   border-radius: 12px;
   font-size: 14px;

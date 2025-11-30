@@ -27,13 +27,13 @@
 }
 
 .answer-option:hover {
-  border-color: #007bff;
-  background-color: #f8f9ff;
+  border-color: #339c33;
+  background-color: #f0f8f0;
 }
 
 .answer-option.selected {
-  border-color: #007bff;
-  background-color: #e7f3ff;
+  border-color: #339c33;
+  background-color: #e8f5e8;
 }
 
 .checkbox {
@@ -62,6 +62,6 @@
 .selected-count {
   margin-bottom: 15px;
   font-weight: 500;
-  color: #007bff;
+  color: #339c33;
 }
 
