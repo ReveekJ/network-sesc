@@ -19,10 +19,26 @@ const SurveyCreator = ({ onSurveyCreated, surveyId, onGoToDashboard }) => {
   const loadActiveSurveys = async () => {
     setLoadingSurveys(true);
     try {
-      const response = await adminApi.getSurveys('active');
-      setActiveSurveys(response.data || []);
+      // Load both active and draft surveys
+      const [activeResponse, draftResponse] = await Promise.all([
+        adminApi.getSurveys('active'),
+        adminApi.getSurveys('draft')
+      ]);
+      
+      // Combine and deduplicate surveys
+      const allSurveys = [
+        ...(activeResponse.data || []),
+        ...(draftResponse.data || [])
+      ];
+      
+      // Remove duplicates by id
+      const uniqueSurveys = allSurveys.filter((survey, index, self) =>
+        index === self.findIndex((s) => s.id === survey.id)
+      );
+      
+      setActiveSurveys(uniqueSurveys);
     } catch (err) {
-      console.error('Error loading active surveys:', err);
+      console.error('Error loading surveys:', err);
     } finally {
       setLoadingSurveys(false);
     }
@@ -75,7 +91,7 @@ const SurveyCreator = ({ onSurveyCreated, surveyId, onGoToDashboard }) => {
       
       {activeSurveys.length > 0 && (
         <div className="active-surveys-section">
-          <h3>Запущенные опросы</h3>
+          <h3>Опросы (активные и черновики)</h3>
           {loadingSurveys ? (
             <div>Загрузка...</div>
           ) : (
