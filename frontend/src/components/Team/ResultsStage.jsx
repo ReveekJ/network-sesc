@@ -89,6 +89,39 @@ const ResultsStage = ({ teamId }) => {
                     </span>
                   ))}
                 </div>
+                {team.participants && team.participants.length > 0 && (
+                  <div className="team-participants">
+                    <h4 className="participants-title">Состав команды:</h4>
+                    <div className="participants-list">
+                      {team.participants.map((participant) => (
+                        <div key={participant.id} className="participant-card">
+                          <div className="participant-name">
+                            {participant.first_name} {participant.last_name}
+                          </div>
+                          <div className="participant-info">
+                            <div className="participant-profession">
+                              <strong>Профессия:</strong> {participant.profession}
+                            </div>
+                            {participant.contact_info && (
+                              <div className="participant-contacts">
+                                {participant.contact_info.phone && (
+                                  <div className="contact-item">
+                                    <strong>Телефон:</strong> {participant.contact_info.phone}
+                                  </div>
+                                )}
+                                {participant.contact_info.email && (
+                                  <div className="contact-item">
+                                    <strong>Email:</strong> {participant.contact_info.email}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>

@@ -5,6 +5,7 @@ from app.models.team import Team
 from app.models.question import Question, QuestionType
 from app.models.answer import Answer
 from app.models.vote import Vote
+from app.models.participant import Participant
 from app.services.qr_service import generate_qr_code, generate_invite_code
 from app.utils.websocket_manager import websocket_manager, run_async_in_thread
 from typing import List, Dict, Optional
@@ -346,10 +347,24 @@ class SurveyService:
         for team_id, answer_ids in team_votes.items():
             team = db.query(Team).filter(Team.id == team_id).first()
             if team:
+                # Get team participants
+                participants = db.query(Participant).filter(Participant.team_id == team_id).all()
+                participants_data = [
+                    {
+                        "id": p.id,
+                        "first_name": p.first_name,
+                        "last_name": p.last_name,
+                        "contact_info": p.contact_info,
+                        "profession": p.profession
+                    }
+                    for p in participants
+                ]
+                
                 teams_voting.append({
                     "team_id": team_id,
                     "team_name": team.name,
-                    "voted_for": [db.query(Answer).filter(Answer.id == aid).first().content for aid in answer_ids]
+                    "voted_for": [db.query(Answer).filter(Answer.id == aid).first().content for aid in answer_ids],
+                    "participants": participants_data
                 })
         
         return {
