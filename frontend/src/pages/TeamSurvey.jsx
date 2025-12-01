@@ -160,7 +160,39 @@ const TeamSurvey = () => {
   const questionStatus = teamStatus?.question_status || 'pending';
   const votingStatus = teamStatus?.voting_status || 'pending';
 
-  // Check if survey is not active
+  // Check if survey is draft (not started yet)
+  if (surveyStatus === 'draft') {
+    return (
+      <div className="app">
+        <div className="container">
+          <h1>{survey?.title}</h1>
+          <div className="team-info">
+            <p>Команда: <strong>{team.name}</strong></p>
+          </div>
+          <div className="waiting-message">
+            <p>Ожидание начала опроса...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show results if survey is completed or in results stage
+  if (surveyStatus === 'completed' || currentStage === 'results') {
+    return (
+      <div className="app">
+        <div className="container">
+          <h1>{survey?.title}</h1>
+          <div className="team-info">
+            <p>Команда: <strong>{team.name}</strong></p>
+          </div>
+          <ResultsStage teamId={team.id} />
+        </div>
+      </div>
+    );
+  }
+
+  // Check if survey is not active (but not completed)
   if (surveyStatus !== 'active') {
     return (
       <div className="app">
@@ -215,9 +247,6 @@ const TeamSurvey = () => {
           />
         )}
 
-        {currentStage === 'results' && (
-          <ResultsStage teamId={team.id} />
-        )}
 
         {!showWaitingScreen && currentStage !== 'question' && currentStage !== 'voting' && currentStage !== 'results' && (
           <div className="waiting-message">
