@@ -171,6 +171,10 @@ class SurveyService:
             if next_question:
                 next_question.is_active = True
             
+            # If we reached the RESULTS stage, mark survey as completed
+            if survey.current_stage == SurveyStage.RESULTS:
+                survey.status = SurveyStatus.COMPLETED
+            
             db.commit()
             db.refresh(survey)
             
@@ -249,12 +253,26 @@ class SurveyService:
         teams_status = []
         for team in teams:
             status = team.question_status or {}
+            # Get team participants
+            participants = db.query(Participant).filter(Participant.team_id == team.id).all()
+            participants_data = [
+                {
+                    "id": p.id,
+                    "first_name": p.first_name,
+                    "last_name": p.last_name,
+                    "contact_info": p.contact_info,
+                    "profession": p.profession
+                }
+                for p in participants
+            ]
+            
             teams_status.append({
                 "id": team.id,
                 "name": team.name,
                 "joined_at": team.joined_at.isoformat() if team.joined_at else None,
                 "question_status": status.get("question", "pending"),
-                "voting_status": status.get("voting", "pending")
+                "voting_status": status.get("voting", "pending"),
+                "participants": participants_data
             })
         
         return {

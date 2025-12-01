@@ -54,6 +54,21 @@ const TeamsList = ({ teams, currentStage, surveyStatus }) => {
                 </>
               )}
             </div>
+            {team.participants && team.participants.length > 0 && (
+              <div className="team-participants">
+                <div className="participants-title">Участники:</div>
+                <div className="participants-list">
+                  {team.participants.map((participant) => (
+                    <div key={participant.id} className="participant-item">
+                      <div className="participant-name">
+                        {participant.first_name} {participant.last_name}
+                      </div>
+                      <div className="participant-profession">{participant.profession}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>

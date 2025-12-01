@@ -4,6 +4,7 @@ import { useWebSocket } from '../../hooks/useWebSocket';
 import { API_BASE_URL } from '../../utils/constants';
 import TeamsList from './TeamsList';
 import StageController from './StageController';
+import SurveyResults from './SurveyResults';
 import Loading from '../common/Loading';
 import './SurveyDashboard.css';
 
@@ -21,10 +22,18 @@ const SurveyDashboard = ({ surveyId }) => {
   );
 
   const [teams, setTeams] = useState([]);
+  const [results, setResults] = useState(null);
+  const [resultsLoading, setResultsLoading] = useState(false);
 
   useEffect(() => {
     loadSurvey();
   }, [surveyId]);
+
+  useEffect(() => {
+    if (survey?.status === 'completed' || survey?.current_stage === 'results') {
+      loadResults();
+    }
+  }, [survey?.status, survey?.current_stage, surveyId]);
 
   useEffect(() => {
     if (statusData) {
@@ -67,6 +76,18 @@ const SurveyDashboard = ({ surveyId }) => {
       setError(err.response?.data?.detail || 'Ошибка при загрузке опроса');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadResults = async () => {
+    setResultsLoading(true);
+    try {
+      const response = await adminApi.getSurveyResults(surveyId);
+      setResults(response.data);
+    } catch (err) {
+      console.error('Ошибка при загрузке результатов:', err);
+    } finally {
+      setResultsLoading(false);
     }
   };
 
@@ -126,6 +147,16 @@ const SurveyDashboard = ({ surveyId }) => {
         currentStage={survey?.current_stage} 
         surveyStatus={survey?.status}
       />
+
+      {(survey?.status === 'completed' || survey?.current_stage === 'results') && (
+        <>
+          {resultsLoading ? (
+            <Loading />
+          ) : (
+            <SurveyResults results={results} />
+          )}
+        </>
+      )}
 
       {error && <div className="error">{error}</div>}
     </div>
