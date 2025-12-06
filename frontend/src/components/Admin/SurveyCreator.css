@@ -108,3 +108,16 @@
   background-color: #2a7d2a;
 }
 
+.completed-surveys-section {
+  margin-top: 20px;
+}
+
+.survey-item-completed {
+  opacity: 0.85;
+  border-color: #adb5bd;
+}
+
+.status-badge-completed {
+  background-color: #6c757d;
+}
+

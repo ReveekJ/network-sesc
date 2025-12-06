@@ -9,34 +9,37 @@ const SurveyCreator = ({ onSurveyCreated, surveyId, onGoToDashboard }) => {
   const [survey, setSurvey] = useState(null);
   const [error, setError] = useState(null);
   const [activeSurveys, setActiveSurveys] = useState([]);
+  const [completedSurveys, setCompletedSurveys] = useState([]);
   const [loadingSurveys, setLoadingSurveys] = useState(false);
   const [copiedLinkId, setCopiedLinkId] = useState(null);
 
   useEffect(() => {
-    loadActiveSurveys();
+    loadSurveys();
   }, []);
 
-  const loadActiveSurveys = async () => {
+  const loadSurveys = async () => {
     setLoadingSurveys(true);
     try {
-      // Load both active and draft surveys
-      const [activeResponse, draftResponse] = await Promise.all([
+      // Load active, draft, and completed surveys
+      const [activeResponse, draftResponse, completedResponse] = await Promise.all([
         adminApi.getSurveys('active'),
-        adminApi.getSurveys('draft')
+        adminApi.getSurveys('draft'),
+        adminApi.getSurveys('completed')
       ]);
       
-      // Combine and deduplicate surveys
-      const allSurveys = [
+      // Combine and deduplicate active and draft surveys
+      const allActiveSurveys = [
         ...(activeResponse.data || []),
         ...(draftResponse.data || [])
       ];
       
       // Remove duplicates by id
-      const uniqueSurveys = allSurveys.filter((survey, index, self) =>
+      const uniqueActiveSurveys = allActiveSurveys.filter((survey, index, self) =>
         index === self.findIndex((s) => s.id === survey.id)
       );
       
-      setActiveSurveys(uniqueSurveys);
+      setActiveSurveys(uniqueActiveSurveys);
+      setCompletedSurveys(completedResponse.data || []);
     } catch (err) {
       console.error('Error loading surveys:', err);
     } finally {
@@ -57,8 +60,8 @@ const SurveyCreator = ({ onSurveyCreated, surveyId, onGoToDashboard }) => {
         onSurveyCreated(response.data);
       }
       setTitle('');
-      // Reload active surveys list
-      loadActiveSurveys();
+      // Reload surveys list
+      loadSurveys();
     } catch (err) {
       console.error('Error creating survey:', err); // Debug log
       setError(err.response?.data?.detail || 'Ошибка при создании опроса');
@@ -117,6 +120,37 @@ const SurveyCreator = ({ onSurveyCreated, surveyId, onGoToDashboard }) => {
                       onClick={() => handleGoToSurveyDashboard(activeSurvey.id)}
                     >
                       Управление
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {completedSurveys.length > 0 && (
+        <div className="active-surveys-section completed-surveys-section">
+          <h3>Завершенные опросы</h3>
+          {loadingSurveys ? (
+            <div>Загрузка...</div>
+          ) : (
+            <div className="surveys-list">
+              {completedSurveys.map((completedSurvey) => (
+                <div key={completedSurvey.id} className="survey-item survey-item-completed">
+                  <div className="survey-item-info">
+                    <div className="survey-item-title">{completedSurvey.title}</div>
+                    <div className="survey-item-meta">
+                      <span className="status-badge status-badge-completed">{completedSurvey.status}</span>
+                      <span className="invite-code">Код: {completedSurvey.invite_code}</span>
+                    </div>
+                  </div>
+                  <div className="survey-item-actions">
+                    <button
+                      className="button button-primary"
+                      onClick={() => handleGoToSurveyDashboard(completedSurvey.id)}
+                    >
+                      Просмотр результатов
                     </button>
                   </div>
                 </div>
